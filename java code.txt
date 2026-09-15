@@ -1,0 +1,298 @@
+//Import statements
+
+ java.util.ArrayList;
+import java.util.Scanner;
+
+//Book class
+
+class Book {
+    private int bookID;
+    private String title;
+    private String author;
+    private boolean availability;
+
+    public Book(int bookID, String title, String author) {
+        this.bookID = bookID;
+        this.title = title;
+        this.author = author;
+        this.availability = true;
+    }
+
+//Getter methods
+
+    public int getBookID() {
+        return bookID;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public String getAuthor() {
+        return author;
+    }
+
+    public boolean getAvailability() {
+        return availability;
+    }
+
+//Setter method
+
+    public void setAvailability(boolean availability) {
+        this.availability = availability;
+    }
+}
+
+//Borrower class
+
+class Borrower {
+    private int borrowerID;
+    private String name;
+    private ArrayList<Integer> borrowedBooks;
+
+    public Borrower(int borrowerID, String name) {
+        this.borrowerID = borrowerID;
+        this.name = name;
+        this.borrowedBooks = new ArrayList<>();
+    }
+
+    public int getBorrowerID() {
+        return borrowerID;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public ArrayList<Integer> getBorrowedBooks() {
+        return borrowedBooks;
+    }
+}
+
+//Main class
+
+public class Main {
+
+    static Scanner sc = new Scanner(System.in);
+    static ArrayList<Book> books = new ArrayList<>();
+    static ArrayList<Borrower> borrowers = new ArrayList<>();
+
+//findBook()
+
+    static Book findBook(int id) {
+        for (Book b : books) {
+            if (b.getBookID() == id) {
+                return b;
+            }
+        }
+        return null;
+    }
+
+//findBorrower()
+
+    static Borrower findBorrower(int id) {
+        for (Borrower b : borrowers) {
+            if (b.getBorrowerID() == id) {
+                return b;
+            }
+        }
+        return null;
+    }
+
+    static void addBook() {
+        System.out.print("Enter Book ID: ");
+        int id = sc.nextInt();
+        sc.nextLine();
+
+        if (findBook(id) != null) {
+            System.out.println("Book ID already exists!");
+            return;
+        }
+
+        System.out.print("Enter Title: ");
+        String title = sc.nextLine();
+
+        System.out.print("Enter Author: ");
+        String author = sc.nextLine();
+
+        books.add(new Book(id, title, author));
+
+        System.out.println("Book added successfully!");
+    }
+
+    static void viewBooks() {
+        if (books.isEmpty()) {
+            System.out.println("No books available.");
+            return;
+        }
+
+        System.out.println("\n----- BOOK DETAILS -----");
+
+        for (Book b : books) {
+            System.out.println("Book ID: " + b.getBookID());
+            System.out.println("Title: " + b.getTitle());
+            System.out.println("Author: " + b.getAuthor());
+
+            if (b.getAvailability()) {
+                System.out.println("Availability: Available");
+            } else {
+                System.out.println("Availability: Issued");
+            }
+
+            System.out.println("------------------------");
+        }
+    }
+
+    static void borrowBook() {
+        System.out.print("Enter Borrower ID: ");
+        int borrowerID = sc.nextInt();
+        sc.nextLine();
+
+        Borrower borrower = findBorrower(borrowerID);
+
+        if (borrower == null) {
+            System.out.print("Enter Borrower Name: ");
+            String name = sc.nextLine();
+
+            borrower = new Borrower(borrowerID, name);
+            borrowers.add(borrower);
+        }
+
+        System.out.print("Enter Book ID: ");
+        int bookID = sc.nextInt();
+
+        Book book = findBook(bookID);
+
+        if (book == null) {
+            System.out.println("Book not found!");
+            return;
+        }
+
+        if (!book.getAvailability()) {
+            System.out.println("Book is already issued!");
+            return;
+        }
+
+        book.setAvailability(false);
+        borrower.getBorrowedBooks().add(bookID);
+
+        System.out.println("Book borrowed successfully!");
+    }
+
+    static void returnBook() {
+        System.out.print("Enter Borrower ID: ");
+        int borrowerID = sc.nextInt();
+
+        Borrower borrower = findBorrower(borrowerID);
+
+        if (borrower == null) {
+            System.out.println("Borrower not found!");
+            return;
+        }
+
+        System.out.print("Enter Book ID: ");
+        int bookID = sc.nextInt();
+
+        Book book = findBook(bookID);
+
+        if (book == null) {
+            System.out.println("Book not found!");
+            return;
+        }
+
+        if (!borrower.getBorrowedBooks().contains(bookID)) {
+            System.out.println("This borrower did not borrow this book!");
+            return;
+        }
+
+        book.setAvailability(true);
+        borrower.getBorrowedBooks().remove(Integer.valueOf(bookID));
+
+        System.out.println("Book returned successfully!");
+    }
+
+    static void searchBook() {
+        sc.nextLine();
+
+        System.out.print("Enter Title or Author: ");
+        String search = sc.nextLine().toLowerCase();
+
+        boolean found = false;
+
+        for (Book b : books) {
+            if (b.getTitle().toLowerCase().contains(search)
+                    || b.getAuthor().toLowerCase().contains(search)) {
+
+                System.out.println("\nBook ID: " + b.getBookID());
+                System.out.println("Title: " + b.getTitle());
+                System.out.println("Author: " + b.getAuthor());
+
+                if (b.getAvailability()) {
+                    System.out.println("Availability: Available");
+                } else {
+                    System.out.println("Availability: Issued");
+                }
+
+                found = true;
+            }
+        }
+
+        if (!found) {
+            System.out.println("No matching book found!");
+        }
+    }
+
+    public static void main(String[] args) {
+
+        while (true) {
+
+            System.out.println("\n===== LIBRARY MANAGEMENT SYSTEM =====");
+            System.out.println("1. Add Book");
+            System.out.println("2. View Books");
+            System.out.println("3. Borrow Book");
+            System.out.println("4. Return Book");
+            System.out.println("5. Search Book");
+            System.out.println("6. Exit");
+            System.out.print("Enter your choice: ");
+
+            try {
+                int choice = sc.nextInt();
+
+                switch (choice) {
+
+                    case 1:
+                        addBook();    //Add book
+                        break;
+
+                    case 2:
+                        viewBooks();   //view books 
+                        break;
+
+                    case 3:
+                        borrowBook();   //Borrow book
+                        break;
+
+                    case 4:
+                        returnBook();   //Return book
+                        break;
+
+                    case 5:
+                        searchBook();   //search book
+                        break;
+
+                    case 6:
+                        System.out.println("Thank you for using Library Management System!");    //Exit
+                        sc.close();
+                        return;
+
+                    default:
+                        System.out.println("Invalid choice! Please enter 1 to 6.");
+                }
+
+            } catch (Exception e) {
+                System.out.println("Invalid input! Please enter numbers only.");
+                sc.nextLine();
+            }
+        }
+    }
+}
